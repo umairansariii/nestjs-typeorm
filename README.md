@@ -54,3 +54,149 @@ import { ConfigModule } from '@nestjs/config';
 })
 export class AppModule {}
 ```
+
+### TypeORM Resource
+
+Generate a new user resource.
+
+```bash
+nest g resource users
+```
+
+Define the user schema in `user.entity.ts`.
+
+```js
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+
+@Entity()
+export class User {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  firstName: string;
+
+  @Column()
+  lastName: string;
+
+  @Column()
+  email: string;
+
+  @Column()
+  password: string;
+
+  @Column({ default: true })
+  isActive: boolean;
+
+  constructor(partial: Partial<User>) {
+    Object.assign(this, partial);
+  }
+}
+```
+
+Import the user entity in `users.module.ts`.
+
+```js
+import { Module } from '@nestjs/common';
+import { UsersService } from './users.service';
+import { UsersController } from './users.controller';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from './entities/user.entity';
+
+@Module({
+  imports: [TypeOrmModule.forFeature([User])],
+  controllers: [UsersController],
+  providers: [UsersService],
+})
+export class UsersModule {}
+```
+
+### TypeORM Endpoints
+
+Create CRUD endpoints for users in `users.controller.ts`.
+
+```js
+import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { UsersService } from './users.service';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+
+@Controller('users')
+export class UsersController {
+  constructor(private readonly usersService: UsersService) {}
+
+  @Post()
+  async create(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.create(createUserDto);
+  }
+
+  @Get()
+  findAll() {
+    return this.usersService.findAll();
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.usersService.findOne(+id);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.update(+id, updateUserDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.usersService.remove(+id);
+  }
+}
+```
+
+Define the schema for creating a user in `create-user.dto.ts`.
+
+```js
+export class CreateUserDto {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+}
+```
+
+### TypeORM Handlers
+
+Create endpoint handlers for users in `users.service.ts`.
+
+```js
+import { Injectable } from '@nestjs/common';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { EntityManager } from 'typeorm';
+import { User } from './entities/user.entity';
+
+@Injectable()
+export class UsersService {
+  constructor(private readonly entityManager: EntityManager) {}
+
+  async create(createUserDto: CreateUserDto) {
+    const user = new User(createUserDto);
+    await this.entityManager.save(user);
+  }
+
+  findAll() {
+    return `This action returns all users`;
+  }
+
+  findOne(id: number) {
+    return `This action returns a #${id} user`;
+  }
+
+  update(id: number, updateUserDto: UpdateUserDto) {
+    return `This action updates a #${id} user`;
+  }
+
+  remove(id: number) {
+    return `This action removes a #${id} user`;
+  }
+}
+```
