@@ -131,12 +131,12 @@ export class UsersController {
   }
 
   @Get()
-  findAll() {
+  async findAll() {
     return this.usersService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string) {
     return this.usersService.findOne(+id);
   }
 
@@ -171,24 +171,29 @@ Create endpoint handlers for users in `users.service.ts`.
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { EntityManager } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly entityManager: EntityManager) {}
+  constructor(
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+    private readonly entityManager: EntityManager,
+  ) {}
 
   async create(createUserDto: CreateUserDto) {
     const user = new User(createUserDto);
     await this.entityManager.save(user);
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll() {
+    return this.usersRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: number) {
+    return this.usersRepository.findOneBy({ id });
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
