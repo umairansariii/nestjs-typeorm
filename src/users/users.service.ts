@@ -36,7 +36,7 @@ export class UsersService {
     await this.entityManager.save(user);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number) {
+    await this.usersRepository.delete(id);
   }
 }
