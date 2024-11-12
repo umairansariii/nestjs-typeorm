@@ -15,6 +15,7 @@ export class UsersService {
 
   async create(createUserDto: CreateUserDto) {
     const user = new User(createUserDto);
+
     await this.entityManager.save(user);
   }
 
@@ -26,8 +27,13 @@ export class UsersService {
     return this.usersRepository.findOneBy({ id });
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    const user = await this.usersRepository.findOneBy({ id });
+
+    user.firstName = updateUserDto.firstName;
+    user.lastName = updateUserDto.lastName;
+
+    await this.entityManager.save(user);
   }
 
   remove(id: number) {
