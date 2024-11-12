@@ -141,7 +141,7 @@ export class UsersController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(+id, updateUserDto);
   }
 
@@ -152,7 +152,7 @@ export class UsersController {
 }
 ```
 
-Define the schema for creating a user in `create-user.dto.ts`.
+Define the schema for creating an user in `create-user.dto.ts`.
 
 ```js
 export class CreateUserDto {
@@ -160,6 +160,15 @@ export class CreateUserDto {
   lastName: string;
   email: string;
   password: string;
+}
+```
+
+Define the schema for updating an user in `update-user.dto.ts`.
+
+```js
+export class UpdateUserDto {
+  firstName: string;
+  lastName: string;
 }
 ```
 
@@ -185,6 +194,7 @@ export class UsersService {
 
   async create(createUserDto: CreateUserDto) {
     const user = new User(createUserDto);
+
     await this.entityManager.save(user);
   }
 
@@ -196,8 +206,13 @@ export class UsersService {
     return this.usersRepository.findOneBy({ id });
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    const user = await this.usersRepository.findOneBy({ id });
+
+    user.firstName = updateUserDto.firstName;
+    user.lastName = updateUserDto.lastName;
+
+    await this.entityManager.save(user);
   }
 
   remove(id: number) {
