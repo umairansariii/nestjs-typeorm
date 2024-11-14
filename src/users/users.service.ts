@@ -4,6 +4,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { EntityManager, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Profile } from './entities/profile.entity';
 
 @Injectable()
 export class UsersService {
@@ -14,7 +15,13 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    const user = new User(createUserDto);
+    const profile = new Profile({
+      ...createUserDto.profile,
+    });
+    const user = new User({
+      ...createUserDto,
+      profile,
+    });
 
     await this.entityManager.save(user);
   }
