@@ -220,3 +220,98 @@ export class UsersService {
   }
 }
 ```
+
+### TypeORM One-to-One
+
+Define the profile schema in `profile.entity.ts`.
+
+```js
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+
+@Entity()
+export class Profile {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  sex: string;
+
+  @Column()
+  dob: Date;
+
+  @Column()
+  tel: string;
+
+  @Column()
+  address: string;
+
+  @Column()
+  city: string;
+
+  constructor(partial: Partial<Profile>) {
+    Object.assign(this, partial);
+  }
+}
+```
+
+Add a new column in `user.entity.ts` for user profile.
+
+```js
+@OneToOne(() => Profile, { cascade: true })
+@JoinColumn()
+profile: Profile;
+```
+
+Define the schema for creating a profile in `create-profile.dto.ts`.
+
+```js
+export class CreateProfileDto {
+  sex: string;
+  dob: Date;
+  tel: string;
+  address: string;
+  city: string;
+}
+```
+
+Add a new field in `create-user.dto.ts` for user profile.
+
+```js
+{
+  ...
+  profile: CreateProfileDto;
+}
+```
+
+Update the create user method in `users.service.ts`.
+
+```js
+async create(createUserDto: CreateUserDto) {
+  const profile = new Profile({
+    ...createUserDto.profile,
+  });
+  const user = new User({
+    ...createUserDto,
+    profile,
+  });
+
+  await this.entityManager.save(user);
+}
+```
+
+Update the get user method in `users.service.ts`.
+
+```js
+async findOne(id: number) {
+    return this.usersRepository.findOne({
+      where: { id },
+      relations: { profile: true },
+    });
+}
+```
+
+Add profile entity in `users.module.ts`.
+
+```js
+imports: [TypeOrmModule.forFeature([User, Profile])];
+```
