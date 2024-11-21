@@ -299,6 +299,17 @@ async create(createUserDto: CreateUserDto) {
 }
 ```
 
+Update the get user method in `users.service.ts`.
+
+```js
+async findOne(id: number) {
+    return this.usersRepository.findOne({
+      where: { id },
+      relations: { profile: true },
+    });
+}
+```
+
 Add profile entity in `users.module.ts`.
 
 ```js
