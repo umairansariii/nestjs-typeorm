@@ -2,12 +2,15 @@ import {
   Column,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Profile } from './profile.entity';
 import { Review } from './review.entity';
+import { Interest } from './interest.entity';
 
 @Entity()
 export class User {
@@ -35,6 +38,10 @@ export class User {
 
   @OneToMany(() => Review, (review) => review.user, { cascade: true })
   reviews: Review[];
+
+  @ManyToMany(() => Interest, { cascade: true })
+  @JoinTable()
+  interests: Interest[];
 
   constructor(partial: Partial<User>) {
     Object.assign(this, partial);
