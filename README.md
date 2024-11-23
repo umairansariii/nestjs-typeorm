@@ -401,3 +401,75 @@ Add review entity in `users.module.ts`.
 ```js
 imports: [TypeOrmModule.forFeature([User, Profile, Review])],
 ```
+
+### TypeORM Many-to-Many
+
+Define the interest schema in `interest.entity.ts`.
+
+```js
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+
+@Entity()
+export class Interest {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  place: string;
+
+  constructor(partial: Partial<Interest>) {
+    Object.assign(this, partial);
+  }
+}
+```
+
+Add a new relation in `user.entity.ts` for user interests.
+
+```js
+@ManyToMany(() => Interest, { cascade: true })
+@JoinTable()
+interests: Interest[];
+```
+
+Define the schema for creating interests in `create-interest.dto.ts`.
+
+```js
+export class CreateInterestDto {
+  place: string;
+}
+```
+
+Add a new field in `create-user.dto.ts` for user interests.
+
+```js
+{
+  ...
+  interests: CreateInterestDto[];
+}
+```
+
+Update the create user method in `users.service.ts`.
+
+```js
+const interests = createUserDto.interests.map(
+  (createInterestDto) => new Interest(createInterestDto),
+);
+const user = new User({
+  ...createUserDto,
+  profile,
+  reviews: [],
+  interests,
+});
+```
+
+Update the get user method in `users.service.ts`.
+
+```js
+relations: { profile: true, reviews: true, interests: true },
+```
+
+Add interest entity in `users.module.ts`.
+
+```js
+imports: [TypeOrmModule.forFeature([User, Profile, Review, Interest])],
+```
