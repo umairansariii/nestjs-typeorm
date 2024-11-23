@@ -254,7 +254,7 @@ export class Profile {
 }
 ```
 
-Add a new column in `user.entity.ts` for user profile.
+Add a new relation in `user.entity.ts` for user profile.
 
 ```js
 @OneToOne(() => Profile, { cascade: true })
@@ -314,4 +314,45 @@ Add profile entity in `users.module.ts`.
 
 ```js
 imports: [TypeOrmModule.forFeature([User, Profile])];
+```
+
+### TypeORM One-to-Many
+
+Define the review schema in `review.entity.ts`.
+
+```js
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { User } from './user.entity';
+
+@Entity()
+export class Review {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  content: string;
+
+  @Column()
+  rating: number;
+
+  @ManyToOne(() => User, (user) => user.reviews)
+  user: User;
+
+  constructor(partial: Partial<Review>) {
+    Object.assign(this, partial);
+  }
+}
+```
+
+Add a new relation in `user.entity.ts` for user reviews.
+
+```js
+@OneToMany(() => Review, (review) => review.user, { cascade: true })
+reviews: Review[];
+```
+
+Add review entity in `users.module.ts`.
+
+```js
+imports: [TypeOrmModule.forFeature([User, Profile, Review])],
 ```
