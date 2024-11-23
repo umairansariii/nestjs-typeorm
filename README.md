@@ -167,6 +167,7 @@ Define the schema for updating an user in `update-user.dto.ts`.
 
 ```js
 export class UpdateUserDto {
+  isActive: boolean;
   firstName: string;
   lastName: string;
 }
@@ -209,6 +210,7 @@ export class UsersService {
   async update(id: number, updateUserDto: UpdateUserDto) {
     const user = await this.usersRepository.findOneBy({ id });
 
+    user.isActive = updateUserDto.isActive;
     user.firstName = updateUserDto.firstName;
     user.lastName = updateUserDto.lastName;
 
@@ -349,6 +351,49 @@ Add a new relation in `user.entity.ts` for user reviews.
 ```js
 @OneToMany(() => Review, (review) => review.user, { cascade: true })
 reviews: Review[];
+```
+
+Define the schema for creating reviews in `create-review.dto.ts`.
+
+```js
+export class CreateReviewDto {
+  content: string;
+  rating: number;
+}
+```
+
+Add a new field in `update-user.dto.ts` for user reviews.
+
+```js
+{
+  ...
+  reviews: CreateReviewDto[];
+}
+```
+
+Update the create user method in `users.service.ts`.
+
+```js
+const user = new User({
+  ...createUserDto,
+  profile,
+  reviews: [],
+});
+```
+
+Update the get user method in `users.service.ts`.
+
+```js
+relations: { profile: true, reviews: true },
+```
+
+Update the update user method in `users.service.ts`.
+
+```js
+const reviews = updateUserDto.reviews.map(
+  (createReviewDto) => new Review(createReviewDto),
+);
+user.reviews = reviews;
 ```
 
 Add review entity in `users.module.ts`.
