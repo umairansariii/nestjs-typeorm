@@ -5,6 +5,7 @@ import { EntityManager, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Profile } from './entities/profile.entity';
+import { Review } from './entities/review.entity';
 
 @Injectable()
 export class UsersService {
@@ -21,6 +22,7 @@ export class UsersService {
     const user = new User({
       ...createUserDto,
       profile,
+      reviews: [],
     });
 
     await this.entityManager.save(user);
@@ -33,15 +35,21 @@ export class UsersService {
   async findOne(id: number) {
     return this.usersRepository.findOne({
       where: { id },
-      relations: { profile: true },
+      relations: { profile: true, reviews: true },
     });
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
     const user = await this.usersRepository.findOneBy({ id });
 
+    user.isActive = updateUserDto.isActive;
     user.firstName = updateUserDto.firstName;
     user.lastName = updateUserDto.lastName;
+
+    const reviews = updateUserDto.reviews.map(
+      (createReviewDto) => new Review(createReviewDto),
+    );
+    user.reviews = reviews;
 
     await this.entityManager.save(user);
   }
