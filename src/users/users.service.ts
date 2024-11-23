@@ -6,6 +6,7 @@ import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Profile } from './entities/profile.entity';
 import { Review } from './entities/review.entity';
+import { Interest } from './entities/interest.entity';
 
 @Injectable()
 export class UsersService {
@@ -19,10 +20,14 @@ export class UsersService {
     const profile = new Profile({
       ...createUserDto.profile,
     });
+    const interests = createUserDto.interests.map(
+      (createInterestDto) => new Interest(createInterestDto),
+    );
     const user = new User({
       ...createUserDto,
       profile,
       reviews: [],
+      interests,
     });
 
     await this.entityManager.save(user);
@@ -35,7 +40,7 @@ export class UsersService {
   async findOne(id: number) {
     return this.usersRepository.findOne({
       where: { id },
-      relations: { profile: true, reviews: true },
+      relations: { profile: true, reviews: true, interests: true },
     });
   }
 
